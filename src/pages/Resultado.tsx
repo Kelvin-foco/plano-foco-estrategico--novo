@@ -1,7 +1,8 @@
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Download, MessageCircle, Target, TrendingUp, Users, Zap } from "lucide-react";
+import { ArrowLeft, Download, Target, TrendingUp, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface ClinicaData {
@@ -72,104 +73,181 @@ const Resultado = () => {
 
   const diagnostico = gerarDiagnostico();
 
-  const gerarRecomendacoes = () => {
+  const gerarRecomendacoesPersonalizadas = () => {
     const recomendacoes = [];
+    const canaisAtuais = clinicaData.canais_atuais || [];
+    const ticketMedio = parseFloat(clinicaData.ticket_medio.replace(/[R$.,\s]/g, ''));
+    const pacientesIndicacao = parseInt(clinicaData.pacientes_indicacao_mes) || 0;
 
-    // Análise de marketing online
-    if (clinicaData.faz_marketing_online === 'nao') {
+    // Análise de Marketing Digital baseada nos canais atuais
+    if (!canaisAtuais.includes('Instagram') && !canaisAtuais.includes('Facebook')) {
       recomendacoes.push({
-        categoria: "Marketing Digital",
+        categoria: "Presença Digital",
         prioridade: "Alta",
-        acao: "Implementar presença digital imediatamente",
-        detalhes: "Criar contas no Instagram e Google Meu Negócio, desenvolver estratégia de conteúdo focada em educação odontológica."
+        acao: "Criar presença nas redes sociais",
+        detalhes: `Desenvolver perfis profissionais no Instagram e Facebook focados em ${clinicaData.procedimento_principal.toLowerCase()}. Publicar casos antes/depois, dicas de cuidados bucais e depoimentos de pacientes 3x por semana.`,
+        impactoEstimado: "15-25 novos pacientes/mês"
       });
     }
 
-    // Análise de tráfego pago
+    if (!canaisAtuais.includes('Google') && clinicaData.faz_marketing_online === 'nao') {
+      recomendacoes.push({
+        categoria: "Visibilidade Local",
+        prioridade: "Alta",
+        acao: "Otimizar presença no Google",
+        detalhes: "Configurar e otimizar Google Meu Negócio, implementar estratégia de SEO local e solicitar avaliações de pacientes satisfeitos.",
+        impactoEstimado: "20-30 novos pacientes/mês"
+      });
+    }
+
+    // Análise de Tráfego Pago baseada no investimento atual
     if (clinicaData.investe_em_trafego === 'nao') {
+      const investimentoSugerido = Math.max(1500, ticketMedio * 3);
       recomendacoes.push({
         categoria: "Tráfego Pago",
         prioridade: "Média",
-        acao: "Investir em Google Ads e Meta Ads",
-        detalhes: `Começar com investimento de R$ 1.500-3.000/mês focando em ${clinicaData.procedimento_principal.toLowerCase()} na sua região.`
+        acao: "Implementar campanhas de Google Ads",
+        detalhes: `Começar com investimento de R$ ${investimentoSugerido.toLocaleString()}/mês em campanhas direcionadas para "${clinicaData.procedimento_principal.toLowerCase()}" na sua região. ROI esperado: 3:1`,
+        impactoEstimado: `${Math.ceil(investimentoSugerido / ticketMedio * 3)} novos pacientes/mês`
       });
     }
 
-    // Análise de capacidade
-    if (parseFloat(diagnostico.utilizacaoAtual) > 85) {
+    // Análise do Programa de Indicação
+    if (clinicaData.tem_programa_indicacao === 'nao' || pacientesIndicacao < 10) {
       recomendacoes.push({
-        categoria: "Capacidade",
+        categoria: "Programa de Indicações",
         prioridade: "Alta",
-        acao: "Expandir capacidade de atendimento",
-        detalhes: "Considerar aumento de horários de funcionamento ou contratação de mais profissionais."
+        acao: "Estruturar sistema de recompensas por indicação",
+        detalhes: "Criar programa oferecendo desconto de 15% na próxima consulta para quem indicar + brinde para o novo paciente. Implementar cartões de indicação e follow-up estruturado.",
+        impactoEstimado: "10-20 novos pacientes/mês via indicações"
       });
     }
 
-    // Análise de ticket médio
-    const ticketMedio = parseFloat(clinicaData.ticket_medio.replace(/[R$.,\s]/g, ''));
+    // Análise de Marketing Offline baseado nas ações atuais
+    const acoes_offline = [
+      clinicaData.distribui_material === 'sim',
+      clinicaData.participa_eventos === 'sim',
+      clinicaData.fachada_destacada === 'sim',
+      clinicaData.usou_radio_outdoor === 'sim'
+    ].filter(Boolean).length;
+
+    if (acoes_offline < 2) {
+      recomendacoes.push({
+        categoria: "Marketing Local",
+        prioridade: "Média",
+        acao: "Implementar estratégias de marketing local",
+        detalhes: "Participar de feiras de saúde locais, desenvolver parcerias com academias e estabelecimentos próximos, criar material educativo para distribuição em pontos estratégicos.",
+        impactoEstimado: "8-15 novos pacientes/mês"
+      });
+    }
+
+    // Análise de Conversão WhatsApp
+    if (clinicaData.whatsapp_treinado === 'nao' || clinicaData.tempo_resposta_whatsapp !== 'imediato') {
+      recomendacoes.push({
+        categoria: "Otimização de Conversão",
+        prioridade: "Alta",
+        acao: "Treinar equipe para conversão via WhatsApp",
+        detalhes: "Implementar scripts de atendimento, treinamento em técnicas de conversão e sistema de resposta rápida. Meta: converter 70% dos contatos em agendamentos.",
+        impactoEstimado: "Aumento de 30-40% na conversão de leads"
+      });
+    }
+
+    // Análise de Ticket Médio
     if (ticketMedio < 800) {
       recomendacoes.push({
-        categoria: "Ticket Médio",
+        categoria: "Aumento do Ticket Médio",
         prioridade: "Média",
-        acao: "Aumentar valor médio por paciente",
-        detalhes: "Implementar vendas cruzadas, pacotes de tratamento e procedimentos estéticos complementares."
+        acao: "Desenvolver estratégia de upsell",
+        detalhes: `Criar pacotes de tratamento combinados, oferecer procedimentos complementares (clareamento + limpeza), implementar planos de manutenção preventiva. Meta: aumentar ticket para R$ ${(ticketMedio * 1.3).toFixed(0)}.`,
+        impactoEstimado: `Aumento de ${((ticketMedio * 0.3) * parseInt(clinicaData.pacientes_mes)).toLocaleString()} no faturamento mensal`
       });
     }
 
-    // Análise de WhatsApp
-    if (clinicaData.whatsapp_treinado === 'nao') {
+    // Análise de Gestão e Operações
+    if (clinicaData.usa_software_gestao === 'nao' || clinicaData.agenda_organizada === 'nao') {
       recomendacoes.push({
-        categoria: "Conversão WhatsApp",
-        prioridade: "Alta",
-        acao: "Treinar equipe para conversão",
-        detalhes: "Implementar scripts de atendimento e treinamento específico para conversão via WhatsApp."
-      });
-    }
-
-    // Análise de programa de indicação
-    if (clinicaData.tem_programa_indicacao === 'nao') {
-      recomendacoes.push({
-        categoria: "Programa de Indicação",
+        categoria: "Otimização Operacional",
         prioridade: "Média",
-        acao: "Criar programa de indicações",
-        detalhes: "Desenvolver sistema de recompensas para pacientes que indicam novos clientes."
+        acao: "Implementar sistema de gestão eficiente",
+        detalhes: "Adotar software de gestão odontológica, otimizar agendamento online, implementar lembretes automáticos e follow-up pós-consulta.",
+        impactoEstimado: "Redução de 20% no no-show e aumento na retenção"
       });
     }
 
     return recomendacoes;
   };
 
-  const recomendacoes = gerarRecomendacoes();
+  const recomendacoes = gerarRecomendacoesPersonalizadas();
+
+  const gerarPlanoImplementacao = () => {
+    const plano = {
+      fase1: [],
+      fase2: [],
+      fase3: []
+    };
+
+    // Distribuir recomendações por fases baseado na prioridade
+    recomendacoes.forEach(rec => {
+      if (rec.prioridade === 'Alta') {
+        if (plano.fase1.length < 4) {
+          plano.fase1.push(rec.acao);
+        } else {
+          plano.fase2.push(rec.acao);
+        }
+      } else {
+        if (plano.fase2.length < 4) {
+          plano.fase2.push(rec.acao);
+        } else {
+          plano.fase3.push(rec.acao);
+        }
+      }
+    });
+
+    return plano;
+  };
+
+  const planoImplementacao = gerarPlanoImplementacao();
 
   const downloadPDF = () => {
-    // Simular download do PDF
-    const element = document.createElement('a');
-    const file = new Blob([`
-PLANO ESTRATÉGICO - ${clinicaData.nome_clinica}
+    const content = `
+PLANO ESTRATÉGICO PERSONALIZADO - ${clinicaData.nome_clinica}
 
-DIAGNÓSTICO ATUAL:
-- Faturamento atual: ${clinicaData.faturamento_atual}
-- Meta de faturamento: ${clinicaData.faturamento_meta}
-- Gap de crescimento: ${diagnostico.crescimentoNecessario}%
-- Utilização de capacidade: ${diagnostico.utilizacaoAtual}%
+=== DIAGNÓSTICO ATUAL ===
+• Faturamento atual: ${clinicaData.faturamento_atual}
+• Meta de faturamento: ${clinicaData.faturamento_meta}
+• Crescimento necessário: ${diagnostico.crescimentoNecessario}%
+• Pacientes adicionais necessários: ${diagnostico.pacientesNecessarios}
+• Utilização atual da capacidade: ${diagnostico.utilizacaoAtual}%
 
-ANÁLISE DETALHADA:
-- Marketing online: ${clinicaData.faz_marketing_online}
-- Tráfego pago: ${clinicaData.investe_em_trafego}
-- WhatsApp treinado: ${clinicaData.whatsapp_treinado}
-- Tempo resposta WhatsApp: ${clinicaData.tempo_resposta_whatsapp}
-- Programa de indicação: ${clinicaData.tem_programa_indicacao}
-- Software de gestão: ${clinicaData.usa_software_gestao}
+=== ANÁLISE SITUACIONAL ===
+• Procedimento principal: ${clinicaData.procedimento_principal}
+• Canais atuais: ${clinicaData.canais_atuais?.join(', ') || 'Não informado'}
+• Marketing online: ${clinicaData.faz_marketing_online}
+• Tráfego pago: ${clinicaData.investe_em_trafego}
+• Programa de indicação: ${clinicaData.tem_programa_indicacao}
+• WhatsApp treinado: ${clinicaData.whatsapp_treinado}
 
-RECOMENDAÇÕES:
-${recomendacoes.map(rec => `
-- ${rec.categoria}: ${rec.acao}
-  ${rec.detalhes}
+=== ESTRATÉGIAS PERSONALIZADAS ===
+${recomendacoes.map((rec, index) => `
+${index + 1}. ${rec.categoria} (Prioridade ${rec.prioridade})
+   Ação: ${rec.acao}
+   Detalhes: ${rec.detalhes}
+   Impacto Estimado: ${rec.impactoEstimado}
 `).join('')}
 
-Gerado por Foco Marketing
-    `], { type: 'text/plain' });
+=== PLANO DE IMPLEMENTAÇÃO 90 DIAS ===
+Primeiros 30 dias:
+${planoImplementacao.fase1.map(acao => `• ${acao}`).join('\n')}
+
+30-60 dias:
+${planoImplementacao.fase2.map(acao => `• ${acao}`).join('\n')}
+
+60-90 dias:
+${planoImplementacao.fase3.map(acao => `• ${acao}`).join('\n')}
+    `;
     
+    const element = document.createElement('a');
+    const file = new Blob([content], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
     element.download = `plano-estrategico-${clinicaData.nome_clinica.toLowerCase().replace(/\s+/g, '-')}.txt`;
     document.body.appendChild(element);
@@ -188,7 +266,7 @@ Gerado por Foco Marketing
               Início
             </Link>
             <div className="ml-4 text-2xl font-bold text-blue-600">
-              Foco Marketing
+              Diagnóstico Estratégico
             </div>
           </div>
         </div>
@@ -201,7 +279,7 @@ Gerado por Foco Marketing
               Plano Estratégico para {clinicaData.nome_clinica}
             </h1>
             <p className="text-xl text-gray-600">
-              Seu diagnóstico personalizado e ações práticas para alcançar R$ 100.000 de faturamento
+              Estratégias personalizadas baseadas na análise completa do seu negócio
             </p>
           </div>
 
@@ -210,7 +288,7 @@ Gerado por Foco Marketing
             <CardHeader>
               <CardTitle className="flex items-center text-2xl text-gray-900">
                 <Target className="mr-3 h-6 w-6 text-blue-600" />
-                Diagnóstico Atual
+                Diagnóstico da Situação Atual
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -243,46 +321,50 @@ Gerado por Foco Marketing
             </CardContent>
           </Card>
 
-          {/* Oportunidades de Crescimento */}
+          {/* Análise de Oportunidades */}
           <Card className="mb-8 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center text-2xl text-gray-900">
                 <TrendingUp className="mr-3 h-6 w-6 text-green-600" />
-                Oportunidades de Crescimento
+                Análise de Oportunidades
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
                 <div className="p-6 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
                   <h3 className="text-lg font-semibold text-blue-900 mb-3">
-                    Potencial de Mercado
+                    Canais de Captação Atuais
                   </h3>
+                  <p className="text-blue-800 mb-2">
+                    <strong>Utilizando:</strong> {clinicaData.canais_atuais?.join(', ') || 'Não informado'}
+                  </p>
                   <p className="text-blue-800">
-                    Com base no seu procedimento principal ({clinicaData.procedimento_principal.toLowerCase()}) 
-                    e localização, existe um grande potencial de crescimento através de marketing digital 
-                    direcionado e otimização da experiência do paciente.
+                    <strong>Oportunidade:</strong> Expandir para canais não explorados pode aumentar 
+                    significativamente o volume de novos pacientes.
                   </p>
                 </div>
 
                 <div className="p-6 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
                   <h3 className="text-lg font-semibold text-green-900 mb-3">
-                    Expansão de Serviços
+                    Potencial de Indicações
                   </h3>
+                  <p className="text-green-800 mb-2">
+                    <strong>Atual:</strong> {clinicaData.pacientes_indicacao_mes || '0'} pacientes/mês por indicação
+                  </p>
                   <p className="text-green-800">
-                    Oportunidade de implementar tratamentos complementares e pacotes de cuidados 
-                    que podem aumentar significativamente o ticket médio por paciente.
+                    <strong>Potencial:</strong> Estruturar programa pode triplicar indicações orgânicas.
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Recomendações Estratégicas */}
+          {/* Estratégias Personalizadas */}
           <Card className="mb-8 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center text-2xl text-gray-900">
                 <Zap className="mr-3 h-6 w-6 text-yellow-600" />
-                Ações Estratégicas Prioritárias
+                Estratégias Personalizadas
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -302,7 +384,10 @@ Gerado por Foco Marketing
                       </span>
                     </div>
                     <h4 className="font-medium text-blue-900 mb-2">{rec.acao}</h4>
-                    <p className="text-gray-700">{rec.detalhes}</p>
+                    <p className="text-gray-700 mb-2">{rec.detalhes}</p>
+                    <div className="text-sm font-medium text-green-700 bg-green-50 px-3 py-1 rounded inline-block">
+                      💡 {rec.impactoEstimado}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -312,122 +397,65 @@ Gerado por Foco Marketing
           {/* Plano de Implementação */}
           <Card className="mb-8 shadow-lg">
             <CardHeader>
-              <CardTitle className="flex items-center text-2xl text-gray-900">
-                <Users className="mr-3 h-6 w-6 text-purple-600" />
+              <CardTitle className="text-2xl text-gray-900">
                 Plano de Implementação (90 dias)
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div className="p-6 bg-blue-50 rounded-lg">
-                    <h3 className="text-lg font-semibold text-blue-900 mb-3">
-                      Primeiros 30 dias
-                    </h3>
-                    <ul className="space-y-2 text-blue-800">
-                      <li>• Configurar Google Meu Negócio</li>
-                      <li>• Criar perfil profissional no Instagram</li>
-                      <li>• Implementar sistema de agendamento online</li>
-                      <li>• Treinar equipe para experiência do paciente</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="p-6 bg-green-50 rounded-lg">
-                    <h3 className="text-lg font-semibold text-green-900 mb-3">
-                      30-60 dias
-                    </h3>
-                    <ul className="space-y-2 text-green-800">
-                      <li>• Lançar campanhas de tráfego pago</li>
-                      <li>• Implementar estratégia de conteúdo</li>
-                      <li>• Desenvolver pacotes de tratamento</li>
-                      <li>• Sistema de follow-up pós-consulta</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="p-6 bg-purple-50 rounded-lg">
-                    <h3 className="text-lg font-semibold text-purple-900 mb-3">
-                      60-90 dias
-                    </h3>
-                    <ul className="space-y-2 text-purple-800">
-                      <li>• Otimizar conversões e ROI</li>
-                      <li>• Implementar programa de fidelidade</li>
-                      <li>• Expandir oferta de serviços</li>
-                      <li>• Análise e ajustes estratégicos</li>
-                    </ul>
-                  </div>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="p-6 bg-blue-50 rounded-lg">
+                  <h3 className="text-lg font-semibold text-blue-900 mb-3">
+                    Primeiros 30 dias
+                  </h3>
+                  <ul className="space-y-2 text-blue-800">
+                    {planoImplementacao.fase1.map((acao, index) => (
+                      <li key={index}>• {acao}</li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div className="p-6 bg-green-50 rounded-lg">
+                  <h3 className="text-lg font-semibold text-green-900 mb-3">
+                    30-60 dias
+                  </h3>
+                  <ul className="space-y-2 text-green-800">
+                    {planoImplementacao.fase2.map((acao, index) => (
+                      <li key={index}>• {acao}</li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div className="p-6 bg-purple-50 rounded-lg">
+                  <h3 className="text-lg font-semibold text-purple-900 mb-3">
+                    60-90 dias
+                  </h3>
+                  <ul className="space-y-2 text-purple-800">
+                    {planoImplementacao.fase3.map((acao, index) => (
+                      <li key={index}>• {acao}</li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Call to Actions */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <Card className="shadow-lg">
-              <CardContent className="p-8 text-center">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  Baixar Plano Completo
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Receba seu plano estratégico detalhado em PDF para implementar em sua clínica.
-                </p>
-                <Button 
-                  onClick={downloadPDF}
-                  className="bg-blue-600 hover:bg-blue-700 w-full"
-                  size="lg"
-                >
-                  <Download className="mr-2 h-5 w-5" />
-                  Baixar plano estratégico em PDF
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-lg">
-              <CardContent className="p-8 text-center">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  Falar com Especialista
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Converse com nossa equipe para acelerar a implementação do seu plano.
-                </p>
-                <Button 
-                  className="bg-green-600 hover:bg-green-700 w-full"
-                  size="lg"
-                  onClick={() => window.open('https://wa.me/5511999999999?text=Olá! Gostaria de falar sobre o plano estratégico da minha clínica.', '_blank')}
-                >
-                  <MessageCircle className="mr-2 h-5 w-5" />
-                  Fale com um especialista da Foco
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Próximos Passos */}
+          {/* Download do Plano */}
           <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-2xl text-center text-gray-900">
-                Pronto para transformar sua clínica?
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                A Foco Marketing é especializada em marketing para clínicas odontológicas. 
-                Vamos implementar juntos as estratégias que levarão sua clínica aos R$ 100.000 mensais.
+            <CardContent className="p-8 text-center">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                Baixar Plano Estratégico Completo
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Receba todas as estratégias personalizadas em um arquivo para implementar em sua clínica.
               </p>
-              
-              <div className="grid md:grid-cols-3 gap-6 text-center">
-                <div className="p-4">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">200+</div>
-                  <div className="text-gray-600">Clínicas atendidas</div>
-                </div>
-                <div className="p-4">
-                  <div className="text-3xl font-bold text-green-600 mb-2">150%</div>
-                  <div className="text-gray-600">Crescimento médio</div>
-                </div>
-                <div className="p-4">
-                  <div className="text-3xl font-bold text-purple-600 mb-2">90 dias</div>
-                  <div className="text-gray-600">Para ver resultados</div>
-                </div>
-              </div>
+              <Button 
+                onClick={downloadPDF}
+                className="bg-blue-600 hover:bg-blue-700"
+                size="lg"
+              >
+                <Download className="mr-2 h-5 w-5" />
+                Baixar plano estratégico
+              </Button>
             </CardContent>
           </Card>
         </div>
@@ -437,11 +465,8 @@ Gerado por Foco Marketing
       <footer className="bg-white py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600 mb-4">
-              Foco Marketing
-            </div>
             <div className="text-gray-900 text-sm">
-              © 2025 Foco Marketing. Todos os direitos reservados.
+              © 2025 Plano Estratégico Personalizado. Todos os direitos reservados.
             </div>
           </div>
         </div>
