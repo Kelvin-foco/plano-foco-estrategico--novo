@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +15,16 @@ interface ClinicaData {
   investe_em_trafego: string;
   ticket_medio: string;
   pacientes_mes: string;
+  distribui_material: string;
+  participa_eventos: string;
+  fachada_destacada: string;
+  usou_radio_outdoor: string;
+  tem_programa_indicacao: string;
+  pacientes_indicacao_mes: string;
+  whatsapp_treinado: string;
+  tempo_resposta_whatsapp: string;
+  usa_software_gestao: string;
+  agenda_organizada: string;
 }
 
 const Resultado = () => {
@@ -107,6 +116,26 @@ const Resultado = () => {
       });
     }
 
+    // Análise de WhatsApp
+    if (clinicaData.whatsapp_treinado === 'nao') {
+      recomendacoes.push({
+        categoria: "Conversão WhatsApp",
+        prioridade: "Alta",
+        acao: "Treinar equipe para conversão",
+        detalhes: "Implementar scripts de atendimento e treinamento específico para conversão via WhatsApp."
+      });
+    }
+
+    // Análise de programa de indicação
+    if (clinicaData.tem_programa_indicacao === 'nao') {
+      recomendacoes.push({
+        categoria: "Programa de Indicação",
+        prioridade: "Média",
+        acao: "Criar programa de indicações",
+        detalhes: "Desenvolver sistema de recompensas para pacientes que indicam novos clientes."
+      });
+    }
+
     return recomendacoes;
   };
 
@@ -123,6 +152,14 @@ DIAGNÓSTICO ATUAL:
 - Meta de faturamento: ${clinicaData.faturamento_meta}
 - Gap de crescimento: ${diagnostico.crescimentoNecessario}%
 - Utilização de capacidade: ${diagnostico.utilizacaoAtual}%
+
+ANÁLISE DETALHADA:
+- Marketing online: ${clinicaData.faz_marketing_online}
+- Tráfego pago: ${clinicaData.investe_em_trafego}
+- WhatsApp treinado: ${clinicaData.whatsapp_treinado}
+- Tempo resposta WhatsApp: ${clinicaData.tempo_resposta_whatsapp}
+- Programa de indicação: ${clinicaData.tem_programa_indicacao}
+- Software de gestão: ${clinicaData.usa_software_gestao}
 
 RECOMENDAÇÕES:
 ${recomendacoes.map(rec => `
@@ -397,17 +434,14 @@ Gerado por Foco Marketing
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-white py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-400 mb-4">
+            <div className="text-2xl font-bold text-blue-600 mb-4">
               Foco Marketing
             </div>
-            <p className="text-gray-400 mb-6">
-              Especialistas em marketing para clínicas odontológicas
-            </p>
-            <div className="text-gray-500 text-sm">
-              © 2024 Foco Marketing. Todos os direitos reservados.
+            <div className="text-gray-900 text-sm">
+              © 2025 Foco Marketing. Todos os direitos reservados.
             </div>
           </div>
         </div>

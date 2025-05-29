@@ -121,17 +121,14 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-white py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-400 mb-4">
+            <div className="text-2xl font-bold text-blue-600 mb-4">
               Foco Marketing
             </div>
-            <p className="text-gray-400 mb-6">
-              Especialistas em marketing para clínicas odontológicas
-            </p>
-            <div className="text-gray-500 text-sm">
-              © 2024 Foco Marketing. Todos os direitos reservados.
+            <div className="text-gray-900 text-sm">
+              © 2025 Foco Marketing. Todos os direitos reservados.
             </div>
           </div>
         </div>
