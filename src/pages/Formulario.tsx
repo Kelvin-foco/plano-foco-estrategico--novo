@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,9 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Send } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import emailjs from 'emailjs-com';
 
 const Formulario = () => {
   const navigate = useNavigate();
+  const formRef = useRef<HTMLFormElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     nome_clinica: '',
@@ -93,32 +95,44 @@ const Formulario = () => {
     setIsSubmitting(true);
 
     try {
-      // Simular envio de email (sem dependência de API externa)
-      console.log('Dados do formulário:', formData);
-      
-      // Criar payload para o email
-      const emailData = {
-        ...formData,
-        canais_atuais: formData.canais_atuais.join(', '),
-        to_email: 'contato@agenciafocomkt.com.br'
-      };
-
-      console.log('Enviando dados para:', emailData.to_email);
-
-      toast({
-        title: "Formulário enviado com sucesso!",
-        description: "Redirecionando para seu plano estratégico personalizado...",
-      });
-
-      // Store form data for results page
+      // Salvar dados no localStorage ANTES do envio do email
       localStorage.setItem('clinicaData', JSON.stringify(formData));
-      
-      setTimeout(() => {
-        navigate('/resultado');
-      }, 2000);
+      console.log('Dados salvos no localStorage:', formData);
+
+      // Configuração EmailJS
+      const SERVICE_ID = 'service_xxxxxxxxx'; // Substitua pelo seu Service ID
+      const TEMPLATE_ID = 'template_xxxxxxxxx'; // Substitua pelo seu Template ID  
+      const PUBLIC_KEY = 'xxxxxxxxxxxxxxxxx'; // Substitua pela sua Public Key
+
+      // Enviar via EmailJS
+      if (formRef.current) {
+        console.log('Enviando formulário via EmailJS...');
+        
+        await emailjs.sendForm(
+          SERVICE_ID,
+          TEMPLATE_ID,
+          formRef.current,
+          PUBLIC_KEY
+        );
+
+        console.log('Email enviado com sucesso via EmailJS');
+        
+        toast({
+          title: "Formulário enviado com sucesso!",
+          description: "Redirecionando para seu plano estratégico personalizado...",
+        });
+
+        setTimeout(() => {
+          navigate('/resultado');
+        }, 2000);
+
+      } else {
+        throw new Error('Referência do formulário não encontrada');
+      }
 
     } catch (error) {
-      console.error('Erro ao enviar formulário:', error);
+      console.error('Erro no envio via EmailJS:', error);
+      
       toast({
         title: "Erro ao enviar formulário",
         description: "Tente novamente em alguns instantes.",
@@ -164,7 +178,7 @@ const Formulario = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-8">
+              <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
                 {/* Dados Básicos */}
                 <div className="space-y-6">
                   <h3 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">
@@ -221,6 +235,7 @@ const Formulario = () => {
                           ))}
                         </SelectContent>
                       </Select>
+                      <input type="hidden" name="estado" value={formData.estado} />
                     </div>
                     
                     <div>
@@ -271,6 +286,7 @@ const Formulario = () => {
                           ))}
                         </SelectContent>
                       </Select>
+                      <input type="hidden" name="procedimento_principal" value={formData.procedimento_principal} />
                     </div>
                     
                     <div>
@@ -345,6 +361,7 @@ const Formulario = () => {
                         <Label htmlFor="marketing_nao">Não</Label>
                       </div>
                     </RadioGroup>
+                    <input type="hidden" name="faz_marketing_online" value={formData.faz_marketing_online} />
                   </div>
                   
                   <div>
@@ -361,6 +378,7 @@ const Formulario = () => {
                         </div>
                       ))}
                     </div>
+                    <input type="hidden" name="canais_atuais" value={formData.canais_atuais.join(', ')} />
                   </div>
                   
                   <div>
@@ -379,6 +397,7 @@ const Formulario = () => {
                         <Label htmlFor="trafego_nao">Não</Label>
                       </div>
                     </RadioGroup>
+                    <input type="hidden" name="investe_em_trafego" value={formData.investe_em_trafego} />
                   </div>
                 </div>
 
@@ -405,6 +424,7 @@ const Formulario = () => {
                           <Label htmlFor="material_nao">Não</Label>
                         </div>
                       </RadioGroup>
+                      <input type="hidden" name="distribui_material" value={formData.distribui_material} />
                     </div>
                     
                     <div>
@@ -423,6 +443,7 @@ const Formulario = () => {
                           <Label htmlFor="eventos_nao">Não</Label>
                         </div>
                       </RadioGroup>
+                      <input type="hidden" name="participa_eventos" value={formData.participa_eventos} />
                     </div>
                     
                     <div>
@@ -441,6 +462,7 @@ const Formulario = () => {
                           <Label htmlFor="fachada_nao">Não</Label>
                         </div>
                       </RadioGroup>
+                      <input type="hidden" name="fachada_destacada" value={formData.fachada_destacada} />
                     </div>
                     
                     <div>
@@ -459,6 +481,7 @@ const Formulario = () => {
                           <Label htmlFor="radio_nao">Não</Label>
                         </div>
                       </RadioGroup>
+                      <input type="hidden" name="usou_radio_outdoor" value={formData.usou_radio_outdoor} />
                     </div>
                   </div>
                 </div>
@@ -486,6 +509,7 @@ const Formulario = () => {
                           <Label htmlFor="indicacao_nao">Não</Label>
                         </div>
                       </RadioGroup>
+                      <input type="hidden" name="tem_programa_indicacao" value={formData.tem_programa_indicacao} />
                     </div>
                     
                     <div>
@@ -525,6 +549,7 @@ const Formulario = () => {
                           <Label htmlFor="whatsapp_nao">Não</Label>
                         </div>
                       </RadioGroup>
+                      <input type="hidden" name="whatsapp_treinado" value={formData.whatsapp_treinado} />
                     </div>
                     
                     <div>
@@ -539,6 +564,7 @@ const Formulario = () => {
                           <SelectItem value="mais_1h">Mais de 1 hora</SelectItem>
                         </SelectContent>
                       </Select>
+                      <input type="hidden" name="tempo_resposta_whatsapp" value={formData.tempo_resposta_whatsapp} />
                     </div>
                   </div>
                 </div>
@@ -566,6 +592,7 @@ const Formulario = () => {
                           <Label htmlFor="software_nao">Não</Label>
                         </div>
                       </RadioGroup>
+                      <input type="hidden" name="usa_software_gestao" value={formData.usa_software_gestao} />
                     </div>
                     
                     <div>
@@ -584,9 +611,13 @@ const Formulario = () => {
                           <Label htmlFor="agenda_nao">Não</Label>
                         </div>
                       </RadioGroup>
+                      <input type="hidden" name="agenda_organizada" value={formData.agenda_organizada} />
                     </div>
                   </div>
                 </div>
+
+                {/* Campo oculto com email de destino */}
+                <input type="hidden" name="to_email" value="contato@agenciafocomkt.com.br" />
 
                 <div className="text-center pt-8">
                   <Button 

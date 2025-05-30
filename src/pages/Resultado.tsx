@@ -26,6 +26,10 @@ interface ClinicaData {
   tempo_resposta_whatsapp: string;
   usa_software_gestao: string;
   agenda_organizada: string;
+  cidade: string;
+  estado: string;
+  telefone: string;
+  instagram: string;
 }
 
 const Resultado = () => {
@@ -33,8 +37,11 @@ const Resultado = () => {
 
   useEffect(() => {
     const data = localStorage.getItem('clinicaData');
+    console.log('Dados recuperados do localStorage:', data);
     if (data) {
-      setClinicaData(JSON.parse(data));
+      const parsedData = JSON.parse(data);
+      console.log('Dados parsed:', parsedData);
+      setClinicaData(parsedData);
     }
   }, []);
 
@@ -56,28 +63,60 @@ const Resultado = () => {
   }
 
   const gerarDiagnostico = () => {
-    const faturamentoAtual = parseFloat(clinicaData.faturamento_atual.replace(/[R$.,\s]/g, ''));
-    const faturamentoMeta = parseFloat(clinicaData.faturamento_meta.replace(/[R$.,\s]/g, ''));
-    const ticketMedio = parseFloat(clinicaData.ticket_medio.replace(/[R$.,\s]/g, ''));
-    const pacientesMes = parseInt(clinicaData.pacientes_mes);
-    const numeroCadeiras = parseInt(clinicaData.numero_cadeiras);
+    console.log('Gerando diagnóstico com dados:', clinicaData);
+    
+    // Limpar valores monetários e converter para números
+    const faturamentoAtual = parseFloat(clinicaData.faturamento_atual.replace(/[R$.,\s]/g, '')) || 0;
+    const faturamentoMeta = parseFloat(clinicaData.faturamento_meta.replace(/[R$.,\s]/g, '')) || 0;
+    const ticketMedio = parseFloat(clinicaData.ticket_medio.replace(/[R$.,\s]/g, '')) || 0;
+    const pacientesMes = parseInt(clinicaData.pacientes_mes) || 0;
+    const numeroCadeiras = parseInt(clinicaData.numero_cadeiras) || 1;
+
+    console.log('Valores convertidos:', {
+      faturamentoAtual,
+      faturamentoMeta,
+      ticketMedio,
+      pacientesMes,
+      numeroCadeiras
+    });
+
+    const gapFaturamento = faturamentoMeta - faturamentoAtual;
+    const crescimentoNecessario = faturamentoAtual > 0 ? ((gapFaturamento / faturamentoAtual) * 100).toFixed(1) : "0";
+    const pacientesNecessarios = ticketMedio > 0 ? Math.ceil(gapFaturamento / ticketMedio) : 0;
+    const capacidadeMaxima = numeroCadeiras * 20 * 22; // 20 pacientes por cadeira por dia, 22 dias úteis
+    const utilizacaoAtual = capacidadeMaxima > 0 ? (pacientesMes / capacidadeMaxima * 100).toFixed(1) : "0";
 
     return {
-      gapFaturamento: faturamentoMeta - faturamentoAtual,
-      crescimentoNecessario: ((faturamentoMeta - faturamentoAtual) / faturamentoAtual * 100).toFixed(1),
-      pacientesNecessarios: Math.ceil((faturamentoMeta - faturamentoAtual) / ticketMedio),
-      capacidadeMaxima: numeroCadeiras * 20 * 22, // 20 pacientes por cadeira por dia, 22 dias úteis
-      utilizacaoAtual: (pacientesMes / (numeroCadeiras * 20 * 22) * 100).toFixed(1)
+      gapFaturamento,
+      crescimentoNecessario,
+      pacientesNecessarios,
+      capacidadeMaxima,
+      utilizacaoAtual,
+      faturamentoAtual,
+      faturamentoMeta,
+      ticketMedio,
+      pacientesMes,
+      numeroCadeiras
     };
   };
 
   const diagnostico = gerarDiagnostico();
 
   const gerarRecomendacoesPersonalizadas = () => {
+    console.log('Gerando recomendações personalizadas...');
     const recomendacoes = [];
-    const canaisAtuais = clinicaData.canais_atuais || [];
-    const ticketMedio = parseFloat(clinicaData.ticket_medio.replace(/[R$.,\s]/g, ''));
+    const canaisAtuais = Array.isArray(clinicaData.canais_atuais) ? clinicaData.canais_atuais : [];
+    const ticketMedio = parseFloat(clinicaData.ticket_medio.replace(/[R$.,\s]/g, '')) || 0;
     const pacientesIndicacao = parseInt(clinicaData.pacientes_indicacao_mes) || 0;
+
+    console.log('Dados para recomendações:', {
+      canaisAtuais,
+      ticketMedio,
+      pacientesIndicacao,
+      fazMarketingOnline: clinicaData.faz_marketing_online,
+      investeTrafego: clinicaData.investe_em_trafego,
+      whatsappTreinado: clinicaData.whatsapp_treinado
+    });
 
     // Análise de Marketing Digital baseada nos canais atuais
     if (!canaisAtuais.includes('Instagram') && !canaisAtuais.includes('Facebook')) {
@@ -85,7 +124,7 @@ const Resultado = () => {
         categoria: "Presença Digital",
         prioridade: "Alta",
         acao: "Criar presença nas redes sociais",
-        detalhes: `Desenvolver perfis profissionais no Instagram e Facebook focados em ${clinicaData.procedimento_principal.toLowerCase()}. Publicar casos antes/depois, dicas de cuidados bucais e depoimentos de pacientes 3x por semana.`,
+        detalhes: `Desenvolver perfis profissionais no Instagram e Facebook focados em ${clinicaData.procedimento_principal.toLowerCase()}. Publicar casos antes/depois, dicas de cuidados bucais e depoimentos de pacientes 3x por semana. Atualmente você não utiliza estas plataformas essenciais.`,
         impactoEstimado: "15-25 novos pacientes/mês"
       });
     }
@@ -95,7 +134,7 @@ const Resultado = () => {
         categoria: "Visibilidade Local",
         prioridade: "Alta",
         acao: "Otimizar presença no Google",
-        detalhes: "Configurar e otimizar Google Meu Negócio, implementar estratégia de SEO local e solicitar avaliações de pacientes satisfeitos.",
+        detalhes: `Você ainda não faz marketing online. Configure e otimize Google Meu Negócio, implemente estratégia de SEO local para "${clinicaData.cidade}, ${clinicaData.estado}" e solicite avaliações de pacientes satisfeitos.`,
         impactoEstimado: "20-30 novos pacientes/mês"
       });
     }
@@ -107,18 +146,19 @@ const Resultado = () => {
         categoria: "Tráfego Pago",
         prioridade: "Média",
         acao: "Implementar campanhas de Google Ads",
-        detalhes: `Começar com investimento de R$ ${investimentoSugerido.toLocaleString()}/mês em campanhas direcionadas para "${clinicaData.procedimento_principal.toLowerCase()}" na sua região. ROI esperado: 3:1`,
+        detalhes: `Como você não investe em tráfego pago, comece com investimento de R$ ${investimentoSugerido.toLocaleString()}/mês em campanhas direcionadas para "${clinicaData.procedimento_principal.toLowerCase()}" em ${clinicaData.cidade}. ROI esperado: 3:1 baseado no seu ticket médio de ${clinicaData.ticket_medio}.`,
         impactoEstimado: `${Math.ceil(investimentoSugerido / ticketMedio * 3)} novos pacientes/mês`
       });
     }
 
     // Análise do Programa de Indicação
     if (clinicaData.tem_programa_indicacao === 'nao' || pacientesIndicacao < 10) {
+      const statusIndicacao = clinicaData.tem_programa_indicacao === 'nao' ? 'Você não possui' : 'Seu programa atual gera apenas ' + pacientesIndicacao + ' indicações/mês.';
       recomendacoes.push({
         categoria: "Programa de Indicações",
         prioridade: "Alta",
         acao: "Estruturar sistema de recompensas por indicação",
-        detalhes: "Criar programa oferecendo desconto de 15% na próxima consulta para quem indicar + brinde para o novo paciente. Implementar cartões de indicação e follow-up estruturado.",
+        detalhes: `${statusIndicacao} um programa estruturado. Crie programa oferecendo desconto de 15% na próxima consulta para quem indicar + brinde para o novo paciente. Com seus ${clinicaData.pacientes_mes} pacientes/mês, o potencial é alto.`,
         impactoEstimado: "10-20 novos pacientes/mês via indicações"
       });
     }
@@ -132,22 +172,32 @@ const Resultado = () => {
     ].filter(Boolean).length;
 
     if (acoes_offline < 2) {
+      const acoesAtuais = [];
+      if (clinicaData.distribui_material === 'sim') acoesAtuais.push('material impresso');
+      if (clinicaData.participa_eventos === 'sim') acoesAtuais.push('eventos');
+      if (clinicaData.fachada_destacada === 'sim') acoesAtuais.push('fachada destacada');
+      if (clinicaData.usou_radio_outdoor === 'sim') acoesAtuais.push('rádio/outdoor');
+      
       recomendacoes.push({
         categoria: "Marketing Local",
         prioridade: "Média",
         acao: "Implementar estratégias de marketing local",
-        detalhes: "Participar de feiras de saúde locais, desenvolver parcerias com academias e estabelecimentos próximos, criar material educativo para distribuição em pontos estratégicos.",
+        detalhes: `Atualmente você utiliza apenas: ${acoesAtuais.join(', ') || 'nenhuma ação offline'}. Participe de feiras de saúde em ${clinicaData.cidade}, desenvolva parcerias com academias e estabelecimentos próximos, crie material educativo para distribuição.`,
         impactoEstimado: "8-15 novos pacientes/mês"
       });
     }
 
     // Análise de Conversão WhatsApp
     if (clinicaData.whatsapp_treinado === 'nao' || clinicaData.tempo_resposta_whatsapp !== 'imediato') {
+      const problemaWhatsapp = clinicaData.whatsapp_treinado === 'nao' ? 
+        'Sua equipe não é treinada para conversão' : 
+        `Seu tempo de resposta é "${clinicaData.tempo_resposta_whatsapp}" quando deveria ser imediato`;
+      
       recomendacoes.push({
         categoria: "Otimização de Conversão",
         prioridade: "Alta",
         acao: "Treinar equipe para conversão via WhatsApp",
-        detalhes: "Implementar scripts de atendimento, treinamento em técnicas de conversão e sistema de resposta rápida. Meta: converter 70% dos contatos em agendamentos.",
+        detalhes: `${problemaWhatsapp}. Implemente scripts de atendimento, treinamento em técnicas de conversão e sistema de resposta rápida. Meta: converter 70% dos contatos em agendamentos. Seu telefone: ${clinicaData.telefone}.`,
         impactoEstimado: "Aumento de 30-40% na conversão de leads"
       });
     }
@@ -158,22 +208,27 @@ const Resultado = () => {
         categoria: "Aumento do Ticket Médio",
         prioridade: "Média",
         acao: "Desenvolver estratégia de upsell",
-        detalhes: `Criar pacotes de tratamento combinados, oferecer procedimentos complementares (clareamento + limpeza), implementar planos de manutenção preventiva. Meta: aumentar ticket para R$ ${(ticketMedio * 1.3).toFixed(0)}.`,
-        impactoEstimado: `Aumento de ${((ticketMedio * 0.3) * parseInt(clinicaData.pacientes_mes)).toLocaleString()} no faturamento mensal`
+        detalhes: `Seu ticket médio atual de ${clinicaData.ticket_medio} está abaixo do potencial. Crie pacotes de tratamento combinados, ofereça procedimentos complementares (${clinicaData.procedimento_principal.toLowerCase()} + clareamento + limpeza), implemente planos de manutenção preventiva. Meta: aumentar para R$ ${(ticketMedio * 1.3).toFixed(0)}.`,
+        impactoEstimado: `Aumento de R$ ${((ticketMedio * 0.3) * parseInt(clinicaData.pacientes_mes)).toLocaleString()} no faturamento mensal`
       });
     }
 
     // Análise de Gestão e Operações
     if (clinicaData.usa_software_gestao === 'nao' || clinicaData.agenda_organizada === 'nao') {
+      const problemaGestao = [];
+      if (clinicaData.usa_software_gestao === 'nao') problemaGestao.push('não usa software de gestão');
+      if (clinicaData.agenda_organizada === 'nao') problemaGestao.push('agenda desorganizada');
+      
       recomendacoes.push({
         categoria: "Otimização Operacional",
         prioridade: "Média",
         acao: "Implementar sistema de gestão eficiente",
-        detalhes: "Adotar software de gestão odontológica, otimizar agendamento online, implementar lembretes automáticos e follow-up pós-consulta.",
+        detalhes: `Atualmente você tem: ${problemaGestao.join(' e ')}. Com ${clinicaData.numero_cadeiras} cadeiras e ${clinicaData.pacientes_mes} pacientes/mês, adote software de gestão odontológica, otimize agendamento online, implemente lembretes automáticos e follow-up pós-consulta.`,
         impactoEstimado: "Redução de 20% no no-show e aumento na retenção"
       });
     }
 
+    console.log('Recomendações geradas:', recomendacoes);
     return recomendacoes;
   };
 
@@ -279,7 +334,7 @@ ${planoImplementacao.fase3.map(acao => `• ${acao}`).join('\n')}
               Plano Estratégico para {clinicaData.nome_clinica}
             </h1>
             <p className="text-xl text-gray-600">
-              Estratégias personalizadas baseadas na análise completa do seu negócio
+              Estratégias personalizadas baseadas na análise completa do seu negócio em {clinicaData.cidade}, {clinicaData.estado}
             </p>
           </div>
 
@@ -309,13 +364,37 @@ ${planoImplementacao.fase3.map(acao => `• ${acao}`).join('\n')}
                   <div className="text-2xl font-bold text-purple-600">
                     {diagnostico.utilizacaoAtual}%
                   </div>
-                  <div className="text-sm text-gray-600">Utilização da Capacidade</div>
+                  <div className="text-sm text-gray-600">Utilização da Capacidade ({clinicaData.numero_cadeiras} cadeiras)</div>
                 </div>
                 <div className="text-center p-4 bg-orange-50 rounded-lg">
                   <div className="text-2xl font-bold text-orange-600">
                     {diagnostico.pacientesNecessarios}
                   </div>
                   <div className="text-sm text-gray-600">Pacientes Adicionais/Mês</div>
+                </div>
+              </div>
+              
+              {/* Informações detalhadas da clínica */}
+              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                <div className="grid md:grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <strong>Especialidade:</strong> {clinicaData.procedimento_principal}
+                  </div>
+                  <div>
+                    <strong>Ticket Médio:</strong> {clinicaData.ticket_medio}
+                  </div>
+                  <div>
+                    <strong>Pacientes/Mês:</strong> {clinicaData.pacientes_mes}
+                  </div>
+                  <div>
+                    <strong>Marketing Online:</strong> {clinicaData.faz_marketing_online === 'sim' ? 'Sim' : 'Não'}
+                  </div>
+                  <div>
+                    <strong>Tráfego Pago:</strong> {clinicaData.investe_em_trafego === 'sim' ? 'Sim' : 'Não'}
+                  </div>
+                  <div>
+                    <strong>Programa Indicação:</strong> {clinicaData.tem_programa_indicacao === 'sim' ? 'Sim' : 'Não'}
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -336,11 +415,10 @@ ${planoImplementacao.fase3.map(acao => `• ${acao}`).join('\n')}
                     Canais de Captação Atuais
                   </h3>
                   <p className="text-blue-800 mb-2">
-                    <strong>Utilizando:</strong> {clinicaData.canais_atuais?.join(', ') || 'Não informado'}
+                    <strong>Utilizando:</strong> {Array.isArray(clinicaData.canais_atuais) && clinicaData.canais_atuais.length > 0 ? clinicaData.canais_atuais.join(', ') : 'Poucos canais identificados'}
                   </p>
                   <p className="text-blue-800">
-                    <strong>Oportunidade:</strong> Expandir para canais não explorados pode aumentar 
-                    significativamente o volume de novos pacientes.
+                    <strong>Oportunidade:</strong> {clinicaData.faz_marketing_online === 'nao' ? 'Expandir para canais digitais pode triplicar' : 'Otimizar canais existentes pode dobrar'} o volume de novos pacientes.
                   </p>
                 </div>
 
@@ -352,7 +430,7 @@ ${planoImplementacao.fase3.map(acao => `• ${acao}`).join('\n')}
                     <strong>Atual:</strong> {clinicaData.pacientes_indicacao_mes || '0'} pacientes/mês por indicação
                   </p>
                   <p className="text-green-800">
-                    <strong>Potencial:</strong> Estruturar programa pode triplicar indicações orgânicas.
+                    <strong>Potencial:</strong> Com {clinicaData.pacientes_mes} pacientes ativos, estruturar programa pode gerar 15-25 indicações mensais.
                   </p>
                 </div>
               </div>
