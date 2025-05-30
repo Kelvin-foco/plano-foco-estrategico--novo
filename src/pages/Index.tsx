@@ -1,23 +1,30 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Star, Users, TrendingUp } from "lucide-react";
+import { ArrowRight, Star, Users, TrendingUp, Phone, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Separator } from "@/components/ui/separator";
 
 const Index = () => {
+  const scrollToForm = () => {
+    // Scroll to form section or navigate to formulario page
+    window.location.href = '/formulario';
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="bg-white border-b border-gray-100 py-4">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
-            <div className="text-2xl font-bold text-blue-600">
-              Foco Marketing
+            <div className="text-2xl font-bold text-black">
+              Calculadora<span className="text-blue-600">Faturamento</span>
             </div>
-            <div className="hidden md:flex space-x-8 text-gray-600">
-              <a href="#" className="hover:text-blue-600 transition-colors">Sobre</a>
-              <a href="#" className="hover:text-blue-600 transition-colors">Serviços</a>
-              <a href="#" className="hover:text-blue-600 transition-colors">Contato</a>
-            </div>
+            <Button 
+              onClick={scrollToForm}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+            >
+              Começar Diagnóstico
+            </Button>
           </div>
         </div>
       </header>
@@ -121,15 +128,58 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-white py-12 border-t border-gray-100">
+      <footer className="bg-black py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
+            {/* Left Section */}
+            <div>
+              <div className="text-2xl font-bold mb-4">
+                <span className="text-white">Foco</span>
+                <span className="text-blue-600"> Marketing</span>
+              </div>
+              <p className="text-gray-300">
+                Especialistas em marketing digital para clínicas odontológicas.
+              </p>
+            </div>
+            
+            {/* Center Section */}
+            <div>
+              <h4 className="text-white font-semibold mb-4">Links importantes</h4>
+              <div className="space-y-2">
+                <a href="#" className="block text-gray-300 hover:text-blue-400 transition-colors">
+                  Política de Privacidade
+                </a>
+                <a href="#" className="block text-gray-300 hover:text-blue-400 transition-colors">
+                  Termos de Uso
+                </a>
+                <a href="#" className="block text-gray-300 hover:text-blue-400 transition-colors">
+                  Contato
+                </a>
+              </div>
+            </div>
+            
+            {/* Right Section */}
+            <div>
+              <h4 className="text-white font-semibold mb-4">Contato</h4>
+              <div className="space-y-2">
+                <div className="flex items-center text-gray-300">
+                  <Mail className="h-4 w-4 mr-2" />
+                  <span>contato@focomarketing.com.br</span>
+                </div>
+                <div className="flex items-center text-gray-300">
+                  <Phone className="h-4 w-4 mr-2" />
+                  <span>(11) 99999-9999</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <Separator className="bg-gray-700 mb-6" />
+          
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600 mb-4">
-              Foco Marketing
-            </div>
-            <div className="text-gray-900 text-sm">
-              © 2025 Foco Marketing. Todos os direitos reservados.
-            </div>
+            <p className="text-gray-300 text-sm">
+              © 2024 Foco Marketing. Todos os direitos reservados.
+            </p>
           </div>
         </div>
       </footer>
