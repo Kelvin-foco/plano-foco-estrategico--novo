@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,10 +57,10 @@ const Formulario = () => {
       localStorage.setItem('clinicaData', JSON.stringify(formData));
       console.log('Dados salvos no localStorage:', formData);
 
-      // Configurações EmailJS - SUBSTITUA PELOS SEUS VALORES REAIS
-      const SERVICE_ID = 'service_xxxxxxxxx'; // Substitua pelo seu Service ID real
-      const TEMPLATE_ID = 'template_xxxxxxxxx'; // Substitua pelo seu Template ID real
-      const PUBLIC_KEY = 'xxxxxxxxxxxxxxxxx'; // Substitua pela sua Public Key real
+      // Configurações EmailJS - VALORES REAIS
+      const SERVICE_ID = 'service_53u6edm';
+      const TEMPLATE_ID = 'template_6i8so5r';
+      const PUBLIC_KEY = 'AENd6qqqchcIP5Kia';
 
       // Preparar dados para envio
       const templateParams = {
