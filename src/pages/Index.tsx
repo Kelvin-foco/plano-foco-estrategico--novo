@@ -1,32 +1,22 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, Users, TrendingUp, Phone, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
-
 const Index = () => {
   const scrollToForm = () => {
     window.location.href = '/formulario';
   };
-
-  return (
-    <div className="min-h-screen bg-white">
+  return <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="bg-white border-b border-gray-100 py-4">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <img 
-                src="/lovable-uploads/7e59ea8e-ac69-4dbd-b200-0499d6c5f9d7.png" 
-                alt="Foco Marketing" 
-                className="h-8"
-              />
+              <img alt="Foco Marketing" className="h-8" src="/lovable-uploads/7e12ad46-c4fb-42e5-a133-7e480388984d.png" />
             </div>
-            <Button 
-              onClick={scrollToForm}
-              className="text-white px-6 py-2 rounded-lg hover:opacity-90"
-              style={{ backgroundColor: '#274587' }}
-            >
+            <Button onClick={scrollToForm} className="text-white px-6 py-2 rounded-lg hover:opacity-90" style={{
+            backgroundColor: '#274587'
+          }}>
               Começar Diagnóstico
             </Button>
           </div>
@@ -39,7 +29,9 @@ const Index = () => {
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
               Descubra os Próximos Passos para sua Clínica{" "}
-              <span style={{ color: '#274587' }}>Alcançar 100 Mil</span>{" "}
+              <span style={{
+              color: '#274587'
+            }}>Alcançar 100 Mil</span>{" "}
               de Faturamento
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-10 max-w-4xl mx-auto leading-relaxed">
@@ -47,11 +39,9 @@ const Index = () => {
               com ações práticas para escalar sua clínica odontológica.
             </p>
             <Link to="/formulario">
-              <Button 
-                size="lg" 
-                className="text-white px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:opacity-90"
-                style={{ backgroundColor: '#274587' }}
-              >
+              <Button size="lg" className="text-white px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:opacity-90" style={{
+              backgroundColor: '#274587'
+            }}>
                 Começar agora gratuitamente
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
@@ -76,7 +66,9 @@ const Index = () => {
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center p-8 rounded-2xl bg-gray-50 hover:bg-blue-50 transition-colors duration-300">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-6">
-                <Star className="h-8 w-8" style={{ color: '#274587' }} />
+                <Star className="h-8 w-8" style={{
+                color: '#274587'
+              }} />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-4">
                 Análise Personalizada
@@ -89,7 +81,9 @@ const Index = () => {
             
             <div className="text-center p-8 rounded-2xl bg-gray-50 hover:bg-blue-50 transition-colors duration-300">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-6">
-                <Users className="h-8 w-8" style={{ color: '#274587' }} />
+                <Users className="h-8 w-8" style={{
+                color: '#274587'
+              }} />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-4">
                 Foco no Paciente
@@ -102,7 +96,9 @@ const Index = () => {
             
             <div className="text-center p-8 rounded-2xl bg-gray-50 hover:bg-blue-50 transition-colors duration-300">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-6">
-                <TrendingUp className="h-8 w-8" style={{ color: '#274587' }} />
+                <TrendingUp className="h-8 w-8" style={{
+                color: '#274587'
+              }} />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-4">
                 Resultados Comprovados
@@ -117,7 +113,9 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20" style={{ backgroundColor: '#274587' }}>
+      <section className="py-20" style={{
+      backgroundColor: '#274587'
+    }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Pronto para transformar sua clínica?
@@ -127,12 +125,9 @@ const Index = () => {
             para o crescimento sustentável.
           </p>
           <Link to="/formulario">
-            <Button 
-              size="lg" 
-              variant="secondary" 
-              className="bg-white hover:bg-gray-100 px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-              style={{ color: '#274587' }}
-            >
+            <Button size="lg" variant="secondary" className="bg-white hover:bg-gray-100 px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105" style={{
+            color: '#274587'
+          }}>
               Começar minha análise gratuita
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
@@ -147,11 +142,7 @@ const Index = () => {
             {/* Left Section */}
             <div>
               <div className="mb-4">
-                <img 
-                  src="/lovable-uploads/d3ac1f8f-026b-4911-9877-cd4b52be3d75.png" 
-                  alt="Foco Marketing" 
-                  className="h-12"
-                />
+                <img src="/lovable-uploads/d3ac1f8f-026b-4911-9877-cd4b52be3d75.png" alt="Foco Marketing" className="h-12" />
               </div>
               <p className="text-gray-300">
                 Especialistas em marketing digital para clínicas odontológicas.
@@ -181,12 +172,7 @@ const Index = () => {
                 </div>
                 <div className="flex items-center text-gray-300">
                   <Phone className="h-4 w-4 mr-2" />
-                  <a 
-                    href="https://wa.me/5538988180075" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="hover:text-blue-400 transition-colors"
-                  >
+                  <a href="https://wa.me/5538988180075" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">
                     (38) 98818-0075
                   </a>
                 </div>
@@ -203,8 +189,6 @@ const Index = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
