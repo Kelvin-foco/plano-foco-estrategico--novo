@@ -1,626 +1,574 @@
+
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Mail, Phone } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "@/hooks/use-toast";
+import { Separator } from "@/components/ui/separator";
 import emailjs from 'emailjs-com';
+import { useToast } from "@/hooks/use-toast";
+
+interface FormData {
+  nome_clinica: string;
+  faturamento_atual: string;
+  faturamento_meta: string;
+  numero_cadeiras: string;
+  procedimento_principal: string;
+  faz_marketing_online: string;
+  canais_atuais: string[];
+  investe_em_trafego: string;
+  ticket_medio: string;
+  pacientes_mes: string;
+  distribui_material: string;
+  participa_eventos: string;
+  fachada_destacada: string;
+  usou_radio_outdoor: string;
+  tem_programa_indicacao: string;
+  pacientes_indicacao_mes: string;
+  whatsapp_treinado: string;
+  tempo_resposta_whatsapp: string;
+  usa_software_gestao: string;
+  agenda_organizada: string;
+  cidade: string;
+  estado: string;
+  telefone: string;
+  instagram: string;
+}
 
 const Formulario = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [canaisAtuais, setCanaisAtuais] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    nome_clinica: '',
-    faturamento_atual: '',
-    faturamento_meta: '',
-    numero_cadeiras: '',
-    procedimento_principal: '',
-    faz_marketing_online: '',
-    canais_atuais: [] as string[],
-    investe_em_trafego: '',
-    ticket_medio: '',
-    pacientes_mes: '',
-    distribui_material: '',
-    participa_eventos: '',
-    fachada_destacada: '',
-    usou_radio_outdoor: '',
-    tem_programa_indicacao: '',
-    pacientes_indicacao_mes: '',
-    whatsapp_treinado: '',
-    tempo_resposta_whatsapp: '',
-    usa_software_gestao: '',
-    agenda_organizada: '',
-    cidade: '',
-    estado: '',
-    telefone: '',
-    instagram: ''
-  });
+  
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>();
 
-  const procedimentos = [
-    "Limpeza e Profilaxia",
-    "Restaurações",
-    "Endodontia",
-    "Implantes",
-    "Ortodontia",
-    "Próteses",
-    "Cirurgia Oral",
-    "Periodontia",
-    "Clareamento",
-    "Estética Dental"
-  ];
-
-  const canaisMarketing = [
-    "Instagram",
-    "Facebook",
-    "Google",
-    "WhatsApp",
-    "Site próprio",
-    "YouTube",
-    "TikTok",
-    "LinkedIn"
-  ];
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const formatCurrency = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    const formatted = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(parseInt(numbers) || 0);
+    return formatted;
   };
 
-  const handleCanaisChange = (canal: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      canais_atuais: checked 
-        ? [...prev.canais_atuais, canal]
-        : prev.canais_atuais.filter(c => c !== canal)
-    }));
+  const handleCurrencyChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: keyof FormData) => {
+    const formatted = formatCurrency(e.target.value);
+    setValue(fieldName, formatted);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validação básica dos campos essenciais
-    if (!formData.nome_clinica || !formData.cidade || !formData.faturamento_atual || !formData.procedimento_principal) {
-      toast({
-        title: "Erro de validação",
-        description: "Por favor, preencha todos os campos obrigatórios.",
-        variant: "destructive"
-      });
-      return;
+  const handleCanalChange = (canal: string, checked: boolean) => {
+    let novosCanais;
+    if (checked) {
+      novosCanais = [...canaisAtuais, canal];
+    } else {
+      novosCanais = canaisAtuais.filter(c => c !== canal);
     }
+    setCanaisAtuais(novosCanais);
+    setValue('canais_atuais', novosCanais);
+  };
 
+  const nextStep = () => {
+    if (currentStep < 4) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
+    
+    console.log('Dados do formulário:', data);
+    
+    // Salvar dados no localStorage
+    localStorage.setItem('clinicaData', JSON.stringify(data));
+    
+    // Preparar dados para envio por email
+    const emailData = {
+      nome_clinica: data.nome_clinica,
+      faturamento_atual: data.faturamento_atual,
+      faturamento_meta: data.faturamento_meta,
+      numero_cadeiras: data.numero_cadeiras,
+      procedimento_principal: data.procedimento_principal,
+      faz_marketing_online: data.faz_marketing_online === 'sim' ? 'Sim' : 'Não',
+      canais_atuais: data.canais_atuais?.join(', ') || 'Nenhum',
+      investe_em_trafego: data.investe_em_trafego === 'sim' ? 'Sim' : 'Não',
+      ticket_medio: data.ticket_medio,
+      pacientes_mes: data.pacientes_mes,
+      distribui_material: data.distribui_material === 'sim' ? 'Sim' : 'Não',
+      participa_eventos: data.participa_eventos === 'sim' ? 'Sim' : 'Não',
+      fachada_destacada: data.fachada_destacada === 'sim' ? 'Sim' : 'Não',
+      usou_radio_outdoor: data.usou_radio_outdoor === 'sim' ? 'Sim' : 'Não',
+      tem_programa_indicacao: data.tem_programa_indicacao === 'sim' ? 'Sim' : 'Não',
+      pacientes_indicacao_mes: data.pacientes_indicacao_mes || 'Não informado',
+      whatsapp_treinado: data.whatsapp_treinado === 'sim' ? 'Sim' : 'Não',
+      tempo_resposta_whatsapp: data.tempo_resposta_whatsapp,
+      usa_software_gestao: data.usa_software_gestao === 'sim' ? 'Sim' : 'Não',
+      agenda_organizada: data.agenda_organizada === 'sim' ? 'Sim' : 'Não',
+      cidade: data.cidade,
+      estado: data.estado,
+      telefone: data.telefone,
+      instagram: data.instagram || 'Não informado'
+    };
 
     try {
-      // Salvar TODOS os dados no localStorage para a tela de resultado
-      localStorage.setItem('clinicaData', JSON.stringify(formData));
-      console.log('Dados completos salvos no localStorage:', formData);
-
-      // Configurações EmailJS
-      const SERVICE_ID = 'service_53u6edm';
-      const TEMPLATE_ID = 'template_6i8so5r';
-      const PUBLIC_KEY = 'AENd6qqqchcIP5Kia';
-
-      // Enviar os campos essenciais incluindo telefone via EmailJS
-      const templateParams = {
-        nome_clinica: formData.nome_clinica,
-        instagram: formData.instagram || 'Não informado',
-        cidade: formData.cidade,
-        telefone: formData.telefone || 'Não informado',
-        faturamento: formData.faturamento_atual,
-        procedimentos: formData.procedimento_principal,
-        to_email: 'contato@agenciafocomkt.com.br'
-      };
-
-      console.log('Enviando dados essenciais via EmailJS:', templateParams);
+      console.log('Enviando email com dados:', emailData);
       
-      await emailjs.send(
-        SERVICE_ID,
-        TEMPLATE_ID,
-        templateParams,
-        PUBLIC_KEY
+      const result = await emailjs.send(
+        'service_aykfj2g',
+        'template_gtkqhel',
+        emailData,
+        'yVbA8gOTXqIEDrAv_'
       );
-
-      console.log('Email enviado com sucesso via EmailJS');
+      
+      console.log('Email enviado com sucesso:', result);
       
       toast({
-        title: "Formulário enviado com sucesso!",
-        description: "Redirecionando para seu plano estratégico personalizado...",
+        title: "Diagnóstico enviado!",
+        description: "Seus dados foram enviados com sucesso. Redirecionando para o resultado...",
       });
-
+      
+      // Redirecionar para a página de resultado após 2 segundos
       setTimeout(() => {
         navigate('/resultado');
       }, 2000);
-
+      
     } catch (error) {
-      console.error('Erro no envio via EmailJS:', error);
+      console.error('Erro ao enviar email:', error);
       
       toast({
-        title: "Erro ao enviar formulário",
-        description: "Verifique sua conexão e tente novamente.",
-        variant: "destructive"
+        title: "Erro ao enviar",
+        description: "Houve um problema ao enviar seus dados. Tente novamente.",
+        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const renderStep1 = () => (
+    <div className="space-y-4">
+      <div>
+        <Label htmlFor="nome_clinica">Nome da Clínica *</Label>
+        <Input
+          id="nome_clinica"
+          {...register("nome_clinica", { required: "Nome da clínica é obrigatório" })}
+          placeholder="Ex: Clínica Odontológica Dr. Silva"
+        />
+        {errors.nome_clinica && <p className="text-red-500 text-sm mt-1">{errors.nome_clinica.message}</p>}
+      </div>
+
+      <div>
+        <Label htmlFor="faturamento_atual">Faturamento Atual Mensal *</Label>
+        <Input
+          id="faturamento_atual"
+          {...register("faturamento_atual", { required: "Faturamento atual é obrigatório" })}
+          placeholder="Ex: R$ 50.000"
+          onChange={(e) => handleCurrencyChange(e, 'faturamento_atual')}
+        />
+        {errors.faturamento_atual && <p className="text-red-500 text-sm mt-1">{errors.faturamento_atual.message}</p>}
+      </div>
+
+      <div>
+        <Label htmlFor="faturamento_meta">Meta de Faturamento Mensal *</Label>
+        <Input
+          id="faturamento_meta"
+          {...register("faturamento_meta", { required: "Meta de faturamento é obrigatória" })}
+          placeholder="Ex: R$ 100.000"
+          onChange={(e) => handleCurrencyChange(e, 'faturamento_meta')}
+        />
+        {errors.faturamento_meta && <p className="text-red-500 text-sm mt-1">{errors.faturamento_meta.message}</p>}
+      </div>
+
+      <div>
+        <Label htmlFor="numero_cadeiras">Número de Cadeiras *</Label>
+        <Select onValueChange={(value) => setValue('numero_cadeiras', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="1">1 cadeira</SelectItem>
+            <SelectItem value="2">2 cadeiras</SelectItem>
+            <SelectItem value="3">3 cadeiras</SelectItem>
+            <SelectItem value="4">4 cadeiras</SelectItem>
+            <SelectItem value="5">5 cadeiras</SelectItem>
+            <SelectItem value="6+">6 ou mais cadeiras</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="procedimento_principal">Procedimento Principal *</Label>
+        <Select onValueChange={(value) => setValue('procedimento_principal', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Clínica Geral">Clínica Geral</SelectItem>
+            <SelectItem value="Ortodontia">Ortodontia</SelectItem>
+            <SelectItem value="Implantodontia">Implantodontia</SelectItem>
+            <SelectItem value="Endodontia">Endodontia</SelectItem>
+            <SelectItem value="Periodontia">Periodontia</SelectItem>
+            <SelectItem value="Prótese">Prótese</SelectItem>
+            <SelectItem value="Odontopediatria">Odontopediatria</SelectItem>
+            <SelectItem value="Cirurgia">Cirurgia</SelectItem>
+            <SelectItem value="Estética">Estética</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+
+  const renderStep2 = () => (
+    <div className="space-y-4">
+      <div>
+        <Label>Você faz marketing online atualmente? *</Label>
+        <Select onValueChange={(value) => setValue('faz_marketing_online', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sim">Sim</SelectItem>
+            <SelectItem value="nao">Não</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Quais canais você utiliza atualmente? (marque todos que se aplicam)</Label>
+        <div className="grid grid-cols-2 gap-2 mt-2">
+          {['Instagram', 'Facebook', 'Google', 'WhatsApp', 'Site próprio', 'Indicações'].map((canal) => (
+            <div key={canal} className="flex items-center space-x-2">
+              <Checkbox
+                id={canal}
+                checked={canaisAtuais.includes(canal)}
+                onCheckedChange={(checked) => handleCanalChange(canal, checked as boolean)}
+              />
+              <Label htmlFor={canal} className="text-sm">{canal}</Label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <Label>Você investe em tráfego pago (Google Ads, Facebook Ads)? *</Label>
+        <Select onValueChange={(value) => setValue('investe_em_trafego', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sim">Sim</SelectItem>
+            <SelectItem value="nao">Não</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="ticket_medio">Ticket Médio por Paciente *</Label>
+        <Input
+          id="ticket_medio"
+          {...register("ticket_medio", { required: "Ticket médio é obrigatório" })}
+          placeholder="Ex: R$ 800"
+          onChange={(e) => handleCurrencyChange(e, 'ticket_medio')}
+        />
+        {errors.ticket_medio && <p className="text-red-500 text-sm mt-1">{errors.ticket_medio.message}</p>}
+      </div>
+
+      <div>
+        <Label htmlFor="pacientes_mes">Quantos pacientes novos você atende por mês? *</Label>
+        <Input
+          id="pacientes_mes"
+          type="number"
+          {...register("pacientes_mes", { required: "Número de pacientes é obrigatório" })}
+          placeholder="Ex: 50"
+        />
+        {errors.pacientes_mes && <p className="text-red-500 text-sm mt-1">{errors.pacientes_mes.message}</p>}
+      </div>
+    </div>
+  );
+
+  const renderStep3 = () => (
+    <div className="space-y-4">
+      <div>
+        <Label>Você distribui material educativo/promocional? *</Label>
+        <Select onValueChange={(value) => setValue('distribui_material', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sim">Sim</SelectItem>
+            <SelectItem value="nao">Não</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Participa de eventos/feiras de saúde? *</Label>
+        <Select onValueChange={(value) => setValue('participa_eventos', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sim">Sim</SelectItem>
+            <SelectItem value="nao">Não</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Sua fachada é destacada/chamativa? *</Label>
+        <Select onValueChange={(value) => setValue('fachada_destacada', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sim">Sim</SelectItem>
+            <SelectItem value="nao">Não</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Já usou rádio/outdoor/mídia impressa? *</Label>
+        <Select onValueChange={(value) => setValue('usou_radio_outdoor', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sim">Sim</SelectItem>
+            <SelectItem value="nao">Não</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Tem programa de indicação estruturado? *</Label>
+        <Select onValueChange={(value) => setValue('tem_programa_indicacao', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sim">Sim</SelectItem>
+            <SelectItem value="nao">Não</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {watch('tem_programa_indicacao') === 'sim' && (
+        <div>
+          <Label htmlFor="pacientes_indicacao_mes">Quantos pacientes chegam por indicação por mês?</Label>
+          <Input
+            id="pacientes_indicacao_mes"
+            type="number"
+            {...register("pacientes_indicacao_mes")}
+            placeholder="Ex: 10"
+          />
+        </div>
+      )}
+    </div>
+  );
+
+  const renderStep4 = () => (
+    <div className="space-y-4">
+      <div>
+        <Label>Sua equipe é treinada para conversão via WhatsApp? *</Label>
+        <Select onValueChange={(value) => setValue('whatsapp_treinado', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sim">Sim</SelectItem>
+            <SelectItem value="nao">Não</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Qual o tempo de resposta no WhatsApp? *</Label>
+        <Select onValueChange={(value) => setValue('tempo_resposta_whatsapp', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="imediato">Imediato (até 5 minutos)</SelectItem>
+            <SelectItem value="rapido">Rápido (até 30 minutos)</SelectItem>
+            <SelectItem value="moderado">Moderado (até 2 horas)</SelectItem>
+            <SelectItem value="lento">Lento (mais de 2 horas)</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Usa software de gestão odontológica? *</Label>
+        <Select onValueChange={(value) => setValue('usa_software_gestao', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sim">Sim</SelectItem>
+            <SelectItem value="nao">Não</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Sua agenda está bem organizada? *</Label>
+        <Select onValueChange={(value) => setValue('agenda_organizada', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sim">Sim</SelectItem>
+            <SelectItem value="nao">Não</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="cidade">Cidade *</Label>
+        <Input
+          id="cidade"
+          {...register("cidade", { required: "Cidade é obrigatória" })}
+          placeholder="Ex: São Paulo"
+        />
+        {errors.cidade && <p className="text-red-500 text-sm mt-1">{errors.cidade.message}</p>}
+      </div>
+
+      <div>
+        <Label htmlFor="estado">Estado *</Label>
+        <Input
+          id="estado"
+          {...register("estado", { required: "Estado é obrigatório" })}
+          placeholder="Ex: SP"
+        />
+        {errors.estado && <p className="text-red-500 text-sm mt-1">{errors.estado.message}</p>}
+      </div>
+
+      <div>
+        <Label htmlFor="telefone">Telefone/WhatsApp *</Label>
+        <Input
+          id="telefone"
+          {...register("telefone", { required: "Telefone é obrigatório" })}
+          placeholder="(11) 99999-9999"
+        />
+        {errors.telefone && <p className="text-red-500 text-sm mt-1">{errors.telefone.message}</p>}
+      </div>
+
+      <div>
+        <Label htmlFor="instagram">Instagram da clínica (opcional)</Label>
+        <Input
+          id="instagram"
+          {...register("instagram")}
+          placeholder="@clinica_exemplo"
+        />
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-100 py-4">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center text-blue-600 hover:text-blue-700 transition-colors">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center">
+            <Link to="/" className="flex items-center hover:opacity-70 transition-colors" style={{ color: '#274587' }}>
               <ArrowLeft className="h-5 w-5 mr-2" />
               Voltar
             </Link>
-            <div className="ml-4 text-2xl font-bold text-blue-600">
-              Foco Marketing
+            <div className="flex items-center">
+              <img alt="Foco Marketing" src="/lovable-uploads/7e12ad46-c4fb-42e5-a133-7e480388984d.png" className="h-12" />
             </div>
           </div>
         </div>
       </header>
 
       <div className="py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Vamos conhecer sua clínica
+              Diagnóstico Estratégico Gratuito
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Responda as perguntas abaixo para recebermos seu plano estratégico personalizado
+            <p className="text-xl text-gray-600">
+              Responda algumas perguntas para receber seu plano personalizado
             </p>
+            <div className="mt-4">
+              <div className="text-sm text-gray-500">
+                Etapa {currentStep} de 4
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div 
+                  className="h-2 rounded-full transition-all duration-300"
+                  style={{ 
+                    backgroundColor: '#274587',
+                    width: `${(currentStep / 4) * 100}%` 
+                  }}
+                ></div>
+              </div>
+            </div>
           </div>
 
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle className="text-2xl text-center text-gray-900">
-                Diagnóstico Estratégico
+              <CardTitle className="text-2xl text-gray-900">
+                {currentStep === 1 && "Informações Básicas da Clínica"}
+                {currentStep === 2 && "Marketing Digital e Captação"}
+                {currentStep === 3 && "Marketing Tradicional e Indicações"}
+                {currentStep === 4 && "Operações e Contato"}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-8">
-                
-                
-                {/* Dados Essenciais */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">
-                    Informações da Clínica
-                  </h3>
-                  
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <Label htmlFor="nome_clinica">Nome da clínica *</Label>
-                      <Input
-                        id="nome_clinica"
-                        name="nome_clinica"
-                        required
-                        value={formData.nome_clinica}
-                        onChange={(e) => handleInputChange('nome_clinica', e.target.value)}
-                        placeholder="Digite o nome da sua clínica"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="instagram">@ do Instagram</Label>
-                      <Input
-                        id="instagram"
-                        name="instagram"
-                        value={formData.instagram}
-                        onChange={(e) => handleInputChange('instagram', e.target.value)}
-                        placeholder="@suaclinica"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="cidade">Cidade *</Label>
-                      <Input
-                        id="cidade"
-                        name="cidade"
-                        required
-                        value={formData.cidade}
-                        onChange={(e) => handleInputChange('cidade', e.target.value)}
-                        placeholder="Digite sua cidade"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="estado">Estado</Label>
-                      <Input
-                        id="estado"
-                        name="estado"
-                        value={formData.estado}
-                        onChange={(e) => handleInputChange('estado', e.target.value)}
-                        placeholder="Digite seu estado"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="telefone">Telefone</Label>
-                      <Input
-                        id="telefone"
-                        name="telefone"
-                        value={formData.telefone}
-                        onChange={(e) => handleInputChange('telefone', e.target.value)}
-                        placeholder="(11) 99999-9999"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="numero_cadeiras">Número de cadeiras</Label>
-                      <Input
-                        id="numero_cadeiras"
-                        name="numero_cadeiras"
-                        type="number"
-                        value={formData.numero_cadeiras}
-                        onChange={(e) => handleInputChange('numero_cadeiras', e.target.value)}
-                        placeholder="Ex: 3"
-                      />
-                    </div>
-                  </div>
-                </div>
+              <form onSubmit={handleSubmit(onSubmit)}>
+                {currentStep === 1 && renderStep1()}
+                {currentStep === 2 && renderStep2()}
+                {currentStep === 3 && renderStep3()}
+                {currentStep === 4 && renderStep4()}
 
-                {/* Faturamento */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">
-                    Faturamento
-                  </h3>
-                  
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <Label htmlFor="faturamento_atual">Faturamento mensal atual *</Label>
-                      <Input
-                        id="faturamento_atual"
-                        name="faturamento_atual"
-                        required
-                        value={formData.faturamento_atual}
-                        onChange={(e) => handleInputChange('faturamento_atual', e.target.value)}
-                        placeholder="Ex: R$ 50.000,00"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="faturamento_meta">Meta de faturamento mensal</Label>
-                      <Input
-                        id="faturamento_meta"
-                        name="faturamento_meta"
-                        value={formData.faturamento_meta}
-                        onChange={(e) => handleInputChange('faturamento_meta', e.target.value)}
-                        placeholder="Ex: R$ 100.000,00"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="ticket_medio">Ticket médio por paciente</Label>
-                      <Input
-                        id="ticket_medio"
-                        name="ticket_medio"
-                        value={formData.ticket_medio}
-                        onChange={(e) => handleInputChange('ticket_medio', e.target.value)}
-                        placeholder="Ex: R$ 300,00"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="pacientes_mes">Pacientes atendidos por mês</Label>
-                      <Input
-                        id="pacientes_mes"
-                        name="pacientes_mes"
-                        type="number"
-                        value={formData.pacientes_mes}
-                        onChange={(e) => handleInputChange('pacientes_mes', e.target.value)}
-                        placeholder="Ex: 150"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Serviços */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">
-                    Serviços
-                  </h3>
-                  
-                  <div>
-                    <Label htmlFor="procedimento_principal">Procedimento principal *</Label>
-                    <Select value={formData.procedimento_principal} onValueChange={(value) => handleInputChange('procedimento_principal', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o procedimento principal" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {procedimentos.map((proc) => (
-                          <SelectItem key={proc} value={proc}>
-                            {proc}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Marketing Digital */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">
-                    Marketing Digital
-                  </h3>
-                  
-                  <div>
-                    <Label>Faz marketing online atualmente?</Label>
-                    <RadioGroup 
-                      value={formData.faz_marketing_online} 
-                      onValueChange={(value) => handleInputChange('faz_marketing_online', value)}
-                      className="mt-2"
+                <div className="flex justify-between mt-8">
+                  {currentStep > 1 && (
+                    <Button
+                      type="button"
+                      onClick={prevStep}
+                      variant="outline"
+                      className="px-6"
                     >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="sim" id="marketing_sim" />
-                        <Label htmlFor="marketing_sim">Sim</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="nao" id="marketing_nao" />
-                        <Label htmlFor="marketing_nao">Não</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
-                  {formData.faz_marketing_online === 'sim' && (
-                    <div>
-                      <Label>Quais canais utiliza atualmente? (marque todos que se aplicam)</Label>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                        {canaisMarketing.map((canal) => (
-                          <div key={canal} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={canal}
-                              checked={formData.canais_atuais.includes(canal)}
-                              onCheckedChange={(checked) => handleCanaisChange(canal, checked as boolean)}
-                            />
-                            <Label htmlFor={canal} className="text-sm">{canal}</Label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                      Anterior
+                    </Button>
                   )}
-
-                  <div>
-                    <Label>Investe em tráfego pago (Google Ads, Facebook Ads)?</Label>
-                    <RadioGroup 
-                      value={formData.investe_em_trafego} 
-                      onValueChange={(value) => handleInputChange('investe_em_trafego', value)}
-                      className="mt-2"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="sim" id="trafego_sim" />
-                        <Label htmlFor="trafego_sim">Sim</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="nao" id="trafego_nao" />
-                        <Label htmlFor="trafego_nao">Não</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-                </div>
-
-                {/* Marketing Offline */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">
-                    Marketing Offline
-                  </h3>
                   
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <Label>Distribui material impresso (panfletos, folders)?</Label>
-                      <RadioGroup 
-                        value={formData.distribui_material} 
-                        onValueChange={(value) => handleInputChange('distribui_material', value)}
-                        className="mt-2"
+                  <div className="ml-auto">
+                    {currentStep < 4 ? (
+                      <Button
+                        type="button"
+                        onClick={nextStep}
+                        className="text-white hover:opacity-90 px-6"
+                        style={{ backgroundColor: '#274587' }}
                       >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="sim" id="material_sim" />
-                          <Label htmlFor="material_sim">Sim</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="nao" id="material_nao" />
-                          <Label htmlFor="material_nao">Não</Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-
-                    <div>
-                      <Label>Participa de eventos e feiras de saúde?</Label>
-                      <RadioGroup 
-                        value={formData.participa_eventos} 
-                        onValueChange={(value) => handleInputChange('participa_eventos', value)}
-                        className="mt-2"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="sim" id="eventos_sim" />
-                          <Label htmlFor="eventos_sim">Sim</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="nao" id="eventos_nao" />
-                          <Label htmlFor="eventos_nao">Não</Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-
-                    <div>
-                      <Label>A fachada da clínica é destacada e atrativa?</Label>
-                      <RadioGroup 
-                        value={formData.fachada_destacada} 
-                        onValueChange={(value) => handleInputChange('fachada_destacada', value)}
-                        className="mt-2"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="sim" id="fachada_sim" />
-                          <Label htmlFor="fachada_sim">Sim</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="nao" id="fachada_nao" />
-                          <Label htmlFor="fachada_nao">Não</Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-
-                    <div>
-                      <Label>Já usou rádio ou outdoor?</Label>
-                      <RadioGroup 
-                        value={formData.usou_radio_outdoor} 
-                        onValueChange={(value) => handleInputChange('usou_radio_outdoor', value)}
-                        className="mt-2"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="sim" id="radio_sim" />
-                          <Label htmlFor="radio_sim">Sim</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="nao" id="radio_nao" />
-                          <Label htmlFor="radio_nao">Não</Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Programa de Indicações */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">
-                    Programa de Indicações
-                  </h3>
-                  
-                  <div>
-                    <Label>Tem programa estruturado de indicações?</Label>
-                    <RadioGroup 
-                      value={formData.tem_programa_indicacao} 
-                      onValueChange={(value) => handleInputChange('tem_programa_indicacao', value)}
-                      className="mt-2"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="sim" id="indicacao_sim" />
-                        <Label htmlFor="indicacao_sim">Sim</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="nao" id="indicacao_nao" />
-                        <Label htmlFor="indicacao_nao">Não</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="pacientes_indicacao_mes">Quantos pacientes chegam por indicação por mês?</Label>
-                    <Input
-                      id="pacientes_indicacao_mes"
-                      name="pacientes_indicacao_mes"
-                      type="number"
-                      value={formData.pacientes_indicacao_mes}
-                      onChange={(e) => handleInputChange('pacientes_indicacao_mes', e.target.value)}
-                      placeholder="Ex: 20"
-                    />
-                  </div>
-                </div>
-
-                {/* Atendimento e Conversão */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">
-                    Atendimento e Conversão
-                  </h3>
-                  
-                  <div>
-                    <Label>A equipe é treinada para conversão via WhatsApp?</Label>
-                    <RadioGroup 
-                      value={formData.whatsapp_treinado} 
-                      onValueChange={(value) => handleInputChange('whatsapp_treinado', value)}
-                      className="mt-2"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="sim" id="whatsapp_sim" />
-                        <Label htmlFor="whatsapp_sim">Sim</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="nao" id="whatsapp_nao" />
-                        <Label htmlFor="whatsapp_nao">Não</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
-                  <div>
-                    <Label>Tempo de resposta no WhatsApp:</Label>
-                    <Select value={formData.tempo_resposta_whatsapp} onValueChange={(value) => handleInputChange('tempo_resposta_whatsapp', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o tempo de resposta" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="imediato">Imediato (até 5 minutos)</SelectItem>
-                        <SelectItem value="rapido">Rápido (até 1 hora)</SelectItem>
-                        <SelectItem value="moderado">Moderado (até 4 horas)</SelectItem>
-                        <SelectItem value="lento">Lento (mais de 4 horas)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Gestão e Operações */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">
-                    Gestão e Operações
-                  </h3>
-                  
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <Label>Usa software de gestão odontológica?</Label>
-                      <RadioGroup 
-                        value={formData.usa_software_gestao} 
-                        onValueChange={(value) => handleInputChange('usa_software_gestao', value)}
-                        className="mt-2"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="sim" id="software_sim" />
-                          <Label htmlFor="software_sim">Sim</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="nao" id="software_nao" />
-                          <Label htmlFor="software_nao">Não</Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-
-                    <div>
-                      <Label>A agenda está bem organizada e otimizada?</Label>
-                      <RadioGroup 
-                        value={formData.agenda_organizada} 
-                        onValueChange={(value) => handleInputChange('agenda_organizada', value)}
-                        className="mt-2"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="sim" id="agenda_sim" />
-                          <Label htmlFor="agenda_sim">Sim</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="nao" id="agenda_nao" />
-                          <Label htmlFor="agenda_nao">Não</Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-center pt-8">
-                  <Button 
-                    type="submit" 
-                    size="lg" 
-                    disabled={isSubmitting}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
-                  >
-                    {isSubmitting ? (
-                      <>Gerando seu plano...</>
+                        Próximo
+                      </Button>
                     ) : (
-                      <>
-                        Gerar meu plano estratégico
-                        <Send className="ml-2 h-5 w-5" />
-                      </>
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="text-white hover:opacity-90 px-8"
+                        style={{ backgroundColor: '#274587' }}
+                      >
+                        {isSubmitting ? 'Enviando...' : 'Gerar meu plano estratégico'}
+                      </Button>
                     )}
-                  </Button>
+                  </div>
                 </div>
               </form>
             </CardContent>
@@ -631,13 +579,54 @@ const Formulario = () => {
       {/* Footer */}
       <footer className="bg-white py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
+            {/* Left Section */}
+            <div>
+              <div className="mb-4">
+                <img alt="Foco Marketing" className="h-20" src="/lovable-uploads/70824f60-9d6d-4c7c-9eaf-86f5700bab89.png" />
+              </div>
+              <p className="text-gray-600">
+                Especialistas em marketing digital para clínicas odontológicas.
+              </p>
+            </div>
+            
+            {/* Center Section */}
+            <div>
+              <h4 className="text-gray-900 font-semibold mb-4">Links importantes</h4>
+              <div className="space-y-2">
+                <Link to="/politica-privacidade" className="block text-gray-600 hover:text-blue-600 transition-colors">
+                  Política de Privacidade
+                </Link>
+                <Link to="/termos-uso" className="block text-gray-600 hover:text-blue-600 transition-colors">
+                  Termos de Uso
+                </Link>
+              </div>
+            </div>
+            
+            {/* Right Section */}
+            <div>
+              <h4 className="text-gray-900 font-semibold mb-4">Contato</h4>
+              <div className="space-y-2">
+                <div className="flex items-center text-gray-600">
+                  <Mail className="h-4 w-4 mr-2" />
+                  <span>contato@agenciafocomkt.com.br</span>
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <Phone className="h-4 w-4 mr-2" />
+                  <a href="https://wa.me/5538988180075" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors">
+                    (38) 98818-0075
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <Separator className="mb-6" />
+          
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600 mb-4">
-              Foco Marketing
-            </div>
-            <div className="text-gray-900 text-sm">
-              © 2025 Foco Marketing. Todos os direitos reservados.
-            </div>
+            <p className="text-gray-600 text-sm">
+              © 2025 Formulário de Diagnóstico. Todos os direitos reservados.
+            </p>
           </div>
         </div>
       </footer>
