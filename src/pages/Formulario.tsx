@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -104,11 +103,12 @@ const Formulario = () => {
       const TEMPLATE_ID = 'template_6i8so5r';
       const PUBLIC_KEY = 'AENd6qqqchcIP5Kia';
 
-      // Enviar apenas os campos essenciais via EmailJS
+      // Enviar os campos essenciais incluindo telefone via EmailJS
       const templateParams = {
         nome_clinica: formData.nome_clinica,
         instagram: formData.instagram || 'Não informado',
         cidade: formData.cidade,
+        telefone: formData.telefone || 'Não informado',
         faturamento: formData.faturamento_atual,
         procedimentos: formData.procedimento_principal,
         to_email: 'contato@agenciafocomkt.com.br'
@@ -183,6 +183,8 @@ const Formulario = () => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-8">
+                
+                
                 {/* Dados Essenciais */}
                 <div className="space-y-6">
                   <h3 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">

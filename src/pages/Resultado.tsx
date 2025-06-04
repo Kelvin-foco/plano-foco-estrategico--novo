@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,7 +52,7 @@ const Resultado = () => {
             Dados não encontrados
           </h2>
           <Link to="/formulario">
-            <Button className="bg-blue-600 hover:bg-blue-700">
+            <Button className="text-white hover:opacity-90" style={{ backgroundColor: '#274587' }}>
               Fazer diagnóstico
             </Button>
           </Link>
@@ -316,11 +315,11 @@ ${planoImplementacao.fase3.map(acao => `• ${acao}`).join('\n')}
       <header className="bg-white border-b border-gray-100 py-4">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center text-blue-600 hover:text-blue-700 transition-colors">
+            <Link to="/" className="flex items-center hover:opacity-70 transition-colors" style={{ color: '#274587' }}>
               <ArrowLeft className="h-5 w-5 mr-2" />
               Início
             </Link>
-            <div className="ml-4 text-2xl font-bold text-blue-600">
+            <div className="ml-4 text-2xl font-bold" style={{ color: '#274587' }}>
               Diagnóstico Estratégico
             </div>
           </div>
@@ -342,14 +341,14 @@ ${planoImplementacao.fase3.map(acao => `• ${acao}`).join('\n')}
           <Card className="mb-8 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center text-2xl text-gray-900">
-                <Target className="mr-3 h-6 w-6 text-blue-600" />
+                <Target className="mr-3 h-6 w-6" style={{ color: '#274587' }} />
                 Diagnóstico da Situação Atual
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">
+                  <div className="text-2xl font-bold" style={{ color: '#274587' }}>
                     {clinicaData.faturamento_atual}
                   </div>
                   <div className="text-sm text-gray-600">Faturamento Atual</div>
@@ -448,7 +447,7 @@ ${planoImplementacao.fase3.map(acao => `• ${acao}`).join('\n')}
             <CardContent>
               <div className="space-y-6">
                 {recomendacoes.map((rec, index) => (
-                  <div key={index} className="border-l-4 border-blue-500 pl-6 py-4 bg-gray-50 rounded-r-lg">
+                  <div key={index} className="border-l-4 pl-6 py-4 bg-gray-50 rounded-r-lg" style={{ borderLeftColor: '#274587' }}>
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-lg font-semibold text-gray-900">
                         {rec.categoria}
@@ -461,7 +460,7 @@ ${planoImplementacao.fase3.map(acao => `• ${acao}`).join('\n')}
                         Prioridade {rec.prioridade}
                       </span>
                     </div>
-                    <h4 className="font-medium text-blue-900 mb-2">{rec.acao}</h4>
+                    <h4 className="font-medium mb-2" style={{ color: '#274587' }}>{rec.acao}</h4>
                     <p className="text-gray-700 mb-2">{rec.detalhes}</p>
                     <div className="text-sm font-medium text-green-700 bg-green-50 px-3 py-1 rounded inline-block">
                       💡 {rec.impactoEstimado}
@@ -528,7 +527,8 @@ ${planoImplementacao.fase3.map(acao => `• ${acao}`).join('\n')}
               </p>
               <Button 
                 onClick={downloadPDF}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="text-white hover:opacity-90"
+                style={{ backgroundColor: '#274587' }}
                 size="lg"
               >
                 <Download className="mr-2 h-5 w-5" />
