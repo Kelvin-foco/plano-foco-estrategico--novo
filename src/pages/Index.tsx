@@ -142,7 +142,7 @@ const Index = () => {
             {/* Left Section */}
             <div>
               <div className="mb-4">
-                <img src="/lovable-uploads/d3ac1f8f-026b-4911-9877-cd4b52be3d75.png" alt="Foco Marketing" className="h-20" />
+                <img alt="Foco Marketing" className="h-20" src="/lovable-uploads/70824f60-9d6d-4c7c-9eaf-86f5700bab89.png" />
               </div>
               <p className="text-gray-300">
                 Especialistas em marketing digital para clínicas odontológicas.
