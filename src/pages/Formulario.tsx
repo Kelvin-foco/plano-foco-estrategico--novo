@@ -10,6 +10,7 @@ import { ArrowLeft, Send } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import emailjs from 'emailjs-com';
+
 const Formulario = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -107,17 +108,23 @@ const Formulario = () => {
       setIsSubmitting(false);
     }
   };
-  return <div className="min-h-screen bg-gray-50">
+
+  return (
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-100 py-4">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center text-blue-900 hover:text-blue-600 transition-colors">
+          <div className="flex items-center justify-between">
+            <Link to="/" className="flex items-center text-[#274587] hover:text-blue-600 transition-colors">
               <ArrowLeft className="h-5 w-5 mr-2" />
               Voltar
             </Link>
-            <div className="ml-4 text-2xl font-bold text-blue-600">
-              Foco Marketing
+            <div className="ml-4">
+              <img 
+                src="/lovable-uploads/6cfa2495-cbeb-4027-9ee9-df499060b483.png" 
+                alt="Foco Marketing" 
+                className="h-8"
+              />
             </div>
           </div>
         </div>
@@ -142,7 +149,6 @@ const Formulario = () => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-8">
-                
                 
                 {/* Dados Essenciais */}
                 <div className="space-y-6">
@@ -444,10 +450,14 @@ const Formulario = () => {
 
                 <div className="text-center pt-8">
                   <Button type="submit" size="lg" disabled={isSubmitting} className="text-white px-12 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-[#274587]">
-                    {isSubmitting ? <>Gerando seu plano...</> : <>
+                    {isSubmitting ? (
+                      <>Gerando seu plano...</>
+                    ) : (
+                      <>
                         Gerar meu plano estratégico
                         <Send className="ml-2 h-5 w-5" />
-                      </>}
+                      </>
+                    )}
                   </Button>
                 </div>
               </form>
@@ -460,8 +470,12 @@ const Formulario = () => {
       <footer className="bg-white py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600 mb-4">
-              Foco Marketing
+            <div className="mb-4">
+              <img 
+                src="/lovable-uploads/6cfa2495-cbeb-4027-9ee9-df499060b483.png" 
+                alt="Foco Marketing" 
+                className="h-8 mx-auto"
+              />
             </div>
             <div className="text-gray-900 text-sm">
               © 2025 Foco Marketing. Todos os direitos reservados.
@@ -469,6 +483,8 @@ const Formulario = () => {
           </div>
         </div>
       </footer>
-    </div>;
+    </div>
+  );
 };
+
 export default Formulario;
