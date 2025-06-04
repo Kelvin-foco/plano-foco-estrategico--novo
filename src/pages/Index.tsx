@@ -12,7 +12,7 @@ const Index = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <img alt="Foco Marketing" className="h-8" src="/lovable-uploads/7e12ad46-c4fb-42e5-a133-7e480388984d.png" />
+              <img alt="Foco Marketing" src="/lovable-uploads/7e12ad46-c4fb-42e5-a133-7e480388984d.png" className="h-20" />
             </div>
             <Button onClick={scrollToForm} className="text-white px-6 py-2 rounded-lg hover:opacity-90" style={{
             backgroundColor: '#274587'
