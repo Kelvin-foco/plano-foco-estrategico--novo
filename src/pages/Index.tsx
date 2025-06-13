@@ -1,14 +1,11 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, Users, TrendingUp, Phone, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
-
 const Index = () => {
   const scrollToForm = () => {
     window.location.href = '/formulario';
   };
-
   return <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="bg-white border-b border-gray-100 py-4">
@@ -27,11 +24,9 @@ const Index = () => {
       </header>
 
       {/* Limited Time Banner */}
-      <div className="bg-red-600 py-2">
+      <div className="py-2 bg-[#274587]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-white font-semibold text-sm">
-            Ferramenta disponível por tempo limitado
-          </p>
+          <p className="text-center text-white font-semibold text-sm">⏰ Ferramenta disponível por tempo limitado</p>
         </div>
       </div>
 
@@ -203,5 +198,4 @@ const Index = () => {
       </footer>
     </div>;
 };
-
 export default Index;
